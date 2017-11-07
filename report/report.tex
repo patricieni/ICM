@@ -1,0 +1,194 @@
+\documentclass[a4paper]{article}
+\frenchspacing
+
+\def\tup#1{\langle#1\rangle}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[autostyle]{csquotes}
+\usepackage[ocgcolorlinks,pdfusetitle]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{graphs,graphs.standard}
+\usetikzlibrary{positioning}
+\tikzset{main node/.style={circle,fill=blue!20,draw,minimum size=1cm,inner sep=0pt},}
+% for doi link
+\usepackage{doi}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+% * <patric.fulop@gmail.com> 2016-11-23T00:32:01.744Z:
+%
+% ^.
+%% Useful packages
+\usepackage{amsmath,amssymb}
+\usepackage{txfonts}
+\usepackage{graphicx}
+
+\usepackage[colorinlistoftodos]{todonotes}
+%\usepackage{biblatex}
+\usepackage{natbib}
+\usepackage{authblk}
+\bibliographystyle{alpha}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\p}{\textbf{p}}
+\DeclareMathOperator{\q}{\textbf{q}}
+\DeclareMathOperator{\W}{\mathbb{W}}
+\DeclareMathOperator{\boldH}{\textbf{H}}
+\DeclareMathOperator{\boldV}{\textbf{V}}
+\DeclareMathOperator{\boldX}{\textbf{X}}
+\DeclareMathOperator{\boldY}{\textbf{Y}}
+\DeclareMathOperator{\boldx}{\textbf{x}}
+\DeclareMathOperator{\boldy}{\textbf{y}}
+\DeclareMathOperator{\boldB}{\textbf{B}}
+\DeclareMathOperator{\R}{\mathbb{R}}
+\DeclareMathOperator{\boldh}{\textbf{h}}
+\DeclareMathOperator{\boldv}{\textbf{v}}
+\DeclareMathOperator{\arrow}{\rightsquigarrow}
+\DeclareMathOperator{\daggerf}{f^{\dagger}}
+\DeclareMathOperator{\daggerT}{T^{\dagger}}
+\DeclareMathOperator{\bra}{\langle}
+\DeclareMathOperator{\ket}{\rangle}
+\DeclareMathOperator{\alphastar}{\alpha^*}
+\DeclareMathOperator{\xprime}{x'}
+\DeclareMathOperator{\wdata}{\W(\p_d,\p_\theta)}
+\DeclareMathOperator{\wempirical}{\W_\gamma(\hat{\p},\p_\theta)}
+\DeclareMathOperator{\klempirical}{KL({\hat{\p} || \p_\theta})}
+\DeclareMathOperator{\kldata}{KL({\p_d || \p_\theta})}
+
+\newtheorem{lemma}{Lemma}
+%\addbibresource{Wasserstein_RBM.bib}
+\title{ICM Collaboration Notes}
+\author{Patric Fulop \& Alex Agachi}
+%{s1043702@sms.ed.ac.uk}
+\affil{The University of Edinburgh}
+
+\begin{document}
+\maketitle
+
+
+\section{Introduction}
+Identify potential, explain problem, literature review, explain briefly what you're predicting in light of lit review. Then conclude by using different benchmarks. Obviously explain your model at some point. 
+\section{Data statistics}
+There are two main datasets, one with biological information and one with clinical data. 
+We give a brief description of the merged dataset before preprocessing:
+%
+\begin{itemize}
+\item \textbf{Key 1:} Patient ID - this is not unique across rows
+\item \textbf{Key 2:} Surgery date and clinical surgery date. 
+These are sometimes off by one day so we took only surgery dates as being relevant.
+\end{itemize}
+%
+There are a total of \textbf{7825} entries and \textbf{6688} unique patients. Each patient has \textbf{30} relevant attributes. For convenience, the attribute names have been renamed more intuitively, and in English :). \\
+\\
+Some of the attributes have missing values.
+\begin{enumerate}
+\item Diagnostic dates are there only for one fifth of the patients,  \textbf{1162}.
+\item Date of birth (DoB) is missing for \textbf{1002} patients.
+\item Date of death is missing for \textbf{4908} entries, should we assume these are survivors? 
+\item Gene data is very sparse, i.e. \textbf{Ch} markers.
+\item Gender data has \textbf{332} entries missing.
+\end{enumerate}
+\subsection{Dealing with Missing data}
+How to deal with class imbalances
+Examples. \\
+Clearly some patients underwent some tests, while others did not. This is a problem we can deal with in a very robust manner as long as we can assume that the data is missing at random (i.e. the mechanism by which it is missing can be described as random, and does not contain relevant information in itself. For example whether a test was conducted or not for a patient does not say something highly relevant about that patient?s condition/survival expectation in itself.) Even if the data is not missing at random, similar techniques would be applied by default of statistics having invented better ones to date, but it would help to understand better the missing data reasons/mechanisms for our variables, to make sure we describe it properly.
+
+
+\section{Encoding clarifications and target variables}
+As previously discussed, in the first phase we are interested in a smaller subset of attributes. We aim here to understand what variables are of interest. We couldn't find the attribute for KPS. For radiotherapy and chemotherapy, should we assume that if the patient does not have a date, he did not undergo that treatment? \\
+\\
+The outcome should be a binary variable indicating whether there was a surgical removal or biopsy. However our data is of 4 types. (Attach image). Furthermore, I think no data here should mean we do not know the outcome. \\
+\\
+For IDH mutations, IDH1 and IDH2 seem to predominate there. Are these the two main ones we are interested in? You mentioned IDH wild type which, I assume is the case for non-mutated IDH gene, so I would just say this is the \textbf{Normal} value of IDH1 Gene. Furthermore, what does NC stand for?
+\textbf{talk about the feature standardization here}
+
+\subitem IDHmut>IDHwt - 2 classes
+	\subitem Codel >IDHmut> IDHwt (3 classes)
+	\subitem IDHmut-Tertmut>IDHmu-Tertwt>IDHwtTertwt>IDHwtTertmut (4 classes)
+	\subitem MGMTm -binary
+	\subitem P16 loss binary 
+	\subitem EGFR amplitude - binary 
+ 	\subitem Loss Chr10 - binary 
+
+\begin{table}[tb]
+\vskip 3mm
+\begin{center}
+\begin{small}
+\begin{sc}
+\begin{tabular}{lcccr}
+\hline
+%\abovespace\belowspace
+Attribute & Present & Missing & Encoding \\
+\hline
+%\abovespace   & 95.9$\pm$ 0.2& 96.7$\pm$ 0.2& $\surd$ \\
+Age at surgery & to see & to see& Age\\%Age at chemo
+Gender  & 7493 & 332 & Gender \\
+Histo Grade    & 7825& 0&  Tumor Grade       \\
+Histo Type    & 7825& 0&  Tumor Type      \\
+KPS    & ?& ?&  ?      \\
+Outcome & 4766 & 3059 & Surgery Type \\
+Radiotherapy Binary    & 2722& 5103&  Rx Date   \\
+Chemotherapy Binary    & 2950& 4875&  Chemo Date      \\
+IDH Mutation 1   & 7327& 498&  Gene IDH1     \\
+IDH Mutation 2   &7078 & 747&  Gene IDH2    \\
+%\belowspace
+\hline
+\end{tabular}
+\end{sc}
+\end{small}
+\caption{Present and missing variables and their encoding}
+\label{tab:sample-table}
+\end{center}
+\vskip -3mm
+\end{table}
+
+
+\subsection{Encoding}
+What is NC? \\
+Confirm Dwh Pat DN Date is Diagnostic date\\
+On average, patients have more than 1 entry according to how many surgeries they went through. Double check if that's correct and devise a plan to deal with that, i.e. assume independence. \\
+\subsection{Target variables}
+We figured several ways of building such a target variable from the dataset, but we much prefer confirming with you this crucial point.
+Can we assume that all patients where there is no death date specified, are still alive (as opposed to them not being alive anymore, but this record being missing)?
+Potential target: Death or no death. Diagnostic - death time. Surgery - death time. 
+
+\subsection{Variables}
+Do a table of the ones of interest, i.e. Age at diagnostic, Age at surgery Tumor type, tumor grade, Age at surgery, Tumor Type, Clinical Evolution
+Genes: Identify them using the stuff he told us. 
+
+\subsection{Data encoding} 
+In terms of genetic tests, is there any equivalence between the following coding schemes for answers:
+%Normal, Amplified
+%Normal, increased, decreased, partial, 
+% Add images here from notebook, easiest way. 
+%Can we treat normal as carrying the same meaning across these schemes? 
+
+\section{ICM Collaboration}
+Find benchmarks and comparison situations for our pipeline and results, i.e. 'Cancer survivability'. \\
+\\
+Qualitatively explain what is the target variable, i.e. a mix of surgery date, cancer detection date and death. The dates are not cool variables to model. Change this as we progress. Also age is an important factor. \\ 
+\begin{enumerate}
+\item Target variables could be time between surgery date and death or just plain and simple death (binary var)
+\item What variables should we use to make the most out of it? Ask Marc once we have a few ideas. 
+\end{enumerate}
+
+\section{Preprocessing}
+Total number of datapoints is 7630 for the biological data and 4868 for the clinical data, well balanced in terms of male/female patients. In terms of merging them, we need to merge on both the \textbf{ID} and the \textbf{Surgery date} since we have multiple inputs for the same person. (check again the merge is correct).\\
+\\
+The clinical surgery date and bio surgery date are off most of the times by one day, but not all the time, so it's plausible to just carefully copy the bio surgery dates into the clinical ones. The new merge dataset results in 7825 entries. \\
+\\
+Now the fun part where we take missing data from one and merge with the other..for x and y. Thankfully there's only 4 of them we need to deal with..Another issue with these variables is that it treats them prior to merge as empty/False. But in reality should be all Nan what is not something specific. \\
+\\ 
+Histology is there for all entries. We have a dataframe with all necessary entries. There's a bunch of missing data in every column, next we deal with them. We remove rows where essential data is not found. 
+% Dealing with missing data
+\subsection{Data imputation}
+Add the relevant things you found. 
+\subsection{Questions for Marc}
+What is DwhPatDNDate? What is 'NC'? 
+
+
+
+
+\end{document}
