@@ -72,7 +72,7 @@
 
 
 \section{Introduction}
-Identify potential, explain problem, literature review, explain briefly what you're predicting in light of lit review. Then conclude by using different benchmarks. Obviously explain your model at some point. 
+Identify potential, explain problem, literature review, explain briefly what you're predicting in light of lit review. Then conclude by using different benchmarks. 
 \section{Data statistics}
 There are two main datasets, one with biological information and one with clinical data. 
 We give a brief description of the merged dataset before preprocessing:
@@ -93,10 +93,6 @@ Some of the attributes have missing values.
 \item Gene data is very sparse, i.e. \textbf{Ch} markers.
 \item Gender data has \textbf{332} entries missing.
 \end{enumerate}
-\subsection{Dealing with Missing data}
-Examples.\cite{little2014statistical} \\
-Clearly some patients underwent some tests, while others did not. This is a problem we can deal with in a very robust manner as long as we can assume that the data is missing at random (i.e. the mechanism by which it is missing can be described as random, and does not contain relevant information in itself. For example whether a test was conducted or not for a patient does not say something highly relevant about that patient?s condition/survival expectation in itself.) Even if the data is not missing at random, similar techniques would be applied by default of statistics having invented better ones to date, but it would help to understand better the missing data reasons/mechanisms for our variables, to make sure we describe it properly.\cite{Garcia-Laencina2015}
-
 
 %\subitem IDHmut>IDHwt - 2 classes 
 %\subitem Codel >IDHmut> IDHwt (3 classes)
@@ -143,15 +139,16 @@ Htert C250T & 4333 & 3492 & Gene C250T  & Categorical (3) \\
 \end{table}
 
 \section{Encoding clarifications and target variables}
-As previously discussed, in the first phase we are interested in a smaller subset of attributes. Table \ref{tab:encoding} above indicates some of the variables of interest. Please let us know if we got the right ones and whether we should add more from the dataset. For some of them, some things remain unclear. \\
+As previously discussed, in the first phase we are interested in a smaller subset of attributes. Table \ref{tab:encoding} above indicates some of the variables of interest. Please let us know if we got the right ones and whether we should add more from the dataset. \\
+For some of them, some things remain unclear. \\
 \begin{enumerate}
 \item We aim to add age at surgery as one variable, taking into account surgery date and date of birth. 
 \item We do not have any attribute for KPS (performance status score) as far as we know. 
 \item The outcome is encoded in the surgery type variable \ref{fig:sub1}. It is either a type of surgical removal or biopsy. For this variable, does missing data tell us that there was no surgery or that we do not know the outcome?
-We can see \textbf{aucune} as a type so I would assume that we do not know the outcome. 
-\item For radiotherapy and chemotherapy, should we assume that if the patient does not have a date, he did not undergo that treatment? 
-\item For IDH mutations \ref{fig:sub2}, IDH1 and IDH2 seem to predominate there. Are these the two main ones we are interested in? You mentioned IDH wild type which, I assume is the case for non-mutated IDH gene, so I would just say this is the \textbf{NORMAL} value of IDH1/IDH2 Gene. Is this correct? Furthermore, what does the value \textbf{NC} stand for?
-\item In terms of genetic tests, is there any equivalence between the following coding schemes for various genes, i.e. can we treat \textbf{NORMAL} or \textbf{ALTERE} as carrying the same meaning across these schemes? i.e. \ref{fig:sub2}, \ref{fig:sub3} and \ref{fig:sub4}
+Does \textbf{aucune} mean that no surgical act whatsoever was undertaken?
+\item For radiotherapy and chemotherapy, should we assume that if the patient does not have a date, he did not undergo that treatment, or is this data missing instead? 
+\item For IDH mutations \ref{fig:sub2}, IDH1 and IDH2 seem to predominate there. Are these the two main ones we are interested in? You mentioned IDH wild type/mutated, so we concluded the \textbf{NORMAL} value of IDH1/IDH2 Gene stands for wild-type. Is this correct? In this context, what does the value \textbf{NC} stand for?
+\item In terms of genetic tests, is there any equivalence between the following coding schemes for various genes, i.e. can we treat \textbf{NORMAL} or \textbf{ALTERE} as carrying the same meaning across these schemes/genes? i.e. \ref{fig:sub2}, \ref{fig:sub3} and \ref{fig:sub4}.
 \end{enumerate}
 %%% IMAGE 1  
 \begin{figure}[H]
@@ -195,7 +192,7 @@ We can see \textbf{aucune} as a type so I would assume that we do not know the o
 \textbf{Target Variable:}
 We want to confirm our idea of selecting the target variable for our models. 
 First of all, can we assume that all patients where there is no death date specified, are still alive? (as opposed to them not being alive anymore, but this record missing)
-Qualitatively we thought of incorporating the surgery date, cancer detection date and death date. 
+Qualitatively we thought of incorporating the surgery date, cancer detection date and death date, but we would much prefer if you would confirm. 
 \begin{itemize}
 \item The easiest target to model is a binary variable representing alive/dead.
 \item The time between diagnostic date and death date. We would scale this variable accordingly to account for no death. 
@@ -206,11 +203,34 @@ Qualitatively we thought of incorporating the surgery date, cancer detection dat
 %Normal, Amplified
 %Normal, increased, decreased, partial, 
 %
-\section{Literature Review}
-Find benchmarks and comparison situations for our pipeline and results, i.e. 'Cancer survivability'.
 
-\section{Miscellaneous}
-Add whatever crosses your mind
+\section{Literature Review}
+We conducted a more focused meta study in the past, of studies tailored to datasets and target variables such as ours. We broke down the study among the important features: datasets used, machine learning models used, validation mechanisms and  feature engineering. 
+Following this review, a possible first study on our dataset would include refining the following models:
+\begin{itemize}
+\item Clustering classifiers such as Gaussian Mixture models (GMM) 
+\item Support Vector Machines (SVM)
+\item Decision Trees 
+\item Neural Networks
+\end{itemize}
+We would then compare the results across all four criteria commonly used: accuracy, sensitivity, specificity, ROC curve and area under the curve (AUC). A similar development was tackled by Garcia-Laencina et. al. (2015) \cite{Garcia-Laencina2015}, in which they focused on breast cancer. 
+%%%% Missing data
+\subsection{Dealing with Missing data}
+Traditional techniques of dealing with missing data in medical studies, available case analysis, pairwise deletion, and single imputation are suboptimal and lead to either/both of loss of statistical power and increased bias in the results \cite{Bell2014}, \cite{Little2012}. As such, dealing with missing data in our study in a statistically robust manner has been a key area of focus in our data preparation to date.\\
+\\
+Clearly some patients in this dataset underwent some tests, while others did not. This is a problem we can deal with in a very robust manner as long as we can assume that the data is missing at random. The missing data mechanism relates to why values are missing and the connection of those reasons with treatment outcomes \cite{Garcia-Laencina2015}. Can we assume that these are random in our study? \\
+\\
+More concretely, for \textbf{C228T} we have \textbf{3489} missing observations in our dataset. Can we assume that these observations are missing in a way that is not reflective of the patients condition and outcome i.e. doctors simply did not order this test, or this test was not available at a specific time, all independent of the patient?s condition. Or if the data is not missing at random - for example the patients for whom we do not have the results to this test were significantly more ill-suffering from a more aggressive form of cancer than the ones for whom we do have the results? It would help to understand the mechanisms better, to make sure our methods are sound. We narrowed down here on a technique called multiple imputation (MI) by chained equations \cite{Graham2007}, \cite{Graham2009}. This type of imputation method involves replacing missing values by suitable estimates and then applying standard complete-data methods to the filled-in data. The basics ideas of MI as proposed by Rubin \cite{Rubin1996} involves the following three steps: 
+\begin{enumerate}
+\item Imputation: Impute missing values using an appropriate model that incorporates appropriate random variation. During this first step, sets of plausible values for missing observations are created that reflect uncertainty about the non-response model. These sets of plausible values can then be used M times to ?complete? the missing values and create M ?completed? data sets. 
+\item Analysis: Perform the desired analysis on each of these M data sets using standard complete-data methods. 
+\item Combination: During this final step, the results are combined, which allows the uncertainty regarding the imputation to be taken into account.
+\end{enumerate}
+%%%% 
+%%% Feature Engineering
+\subsection{Feature engineering}
+Feature engineering (changing variables for example in terms of scale, or creating interaction variables?) is a very large part of building more accurate models. We already thought of adding extra variables based on the current ones, i.e. the time from diagnostic date to surgery (to check the effects of patients delaying significantly recommended surgeries) and the age at diagnostic. Are there other obvious ones you suspect? 
+
 
 \bibliography{ICM}
 \end{document}
