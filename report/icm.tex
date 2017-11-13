@@ -70,7 +70,6 @@
 \begin{document}
 \maketitle
 
-
 \section{Introduction}
 Identify potential, explain problem, literature review, explain briefly what you're predicting in light of lit review. Then conclude by using different benchmarks. 
 \section{Data statistics}
@@ -215,17 +214,28 @@ Following this review, a possible first study on our dataset would include refin
 \end{itemize}
 We would then compare the results across all four criteria commonly used: accuracy, sensitivity, specificity, ROC curve and area under the curve (AUC). A similar development was tackled by Garcia-Laencina et. al. (2015) \cite{Garcia-Laencina2015}, in which they focused on breast cancer. 
 %%%% Missing data
-\subsection{Dealing with Missing data}
+\section{Dealing with Missing data}
+
 Traditional techniques of dealing with missing data in medical studies, available case analysis, pairwise deletion, and single imputation are suboptimal and lead to either/both of loss of statistical power and increased bias in the results \cite{Bell2014}, \cite{Little2012}. As such, dealing with missing data in our study in a statistically robust manner has been a key area of focus in our data preparation to date.\\
 \\
 Clearly some patients in this dataset underwent some tests, while others did not. This is a problem we can deal with in a very robust manner as long as we can assume that the data is missing at random. The missing data mechanism relates to why values are missing and the connection of those reasons with treatment outcomes \cite{Garcia-Laencina2015}. Can we assume that these are random in our study? \\
 \\
 More concretely, for \textbf{C228T} we have \textbf{3489} missing observations in our dataset. Can we assume that these observations are missing in a way that is not reflective of the patients condition and outcome i.e. doctors simply did not order this test, or this test was not available at a specific time, all independent of the patient?s condition. Or if the data is not missing at random - for example the patients for whom we do not have the results to this test were significantly more ill-suffering from a more aggressive form of cancer than the ones for whom we do have the results? It would help to understand the mechanisms better, to make sure our methods are sound. We narrowed down here on a technique called multiple imputation (MI) by chained equations \cite{Graham2007}, \cite{Graham2009}. This type of imputation method involves replacing missing values by suitable estimates and then applying standard complete-data methods to the filled-in data. The basics ideas of MI as proposed by Rubin \cite{Rubin1996} involves the following three steps: 
 \begin{enumerate}
-\item Imputation: Impute missing values using an appropriate model that incorporates appropriate random variation. During this first step, sets of plausible values for missing observations are created that reflect uncertainty about the non-response model. These sets of plausible values can then be used M times to 'complete' the missing values and create M ?completed? data sets. 
+\item Imputation: Impute missing values using an appropriate model that incorporates appropriate random variation. During this first step, sets of plausible values for missing observations are created that reflect uncertainty about the non-response model. These sets of plausible values can then be used M times to 'complete' the missing values and create M 'completed' data sets. 
 \item Analysis: Perform the desired analysis on each of these M data sets using standard complete-data methods. 
 \item Combination: During this final step, the results are combined, which allows the uncertainty regarding the imputation to be taken into account.
+\item Keep track of the uncertainty when we impute and do not bias the study too much. 
+\item Predictive mean matching - some regression 
 \end{enumerate}
+%%%% 
+\subsection{Ideas}
+\begin{itemize}
+\item Key Aspect: Figure out exactly how many unique patients we have so we can work with that dataset first. This is a very tricky aspect, it can break down everything later on. 
+\item Expectation maximization imputation. I guess we could use any density estimation technique for generating datapoints. Apparently KNN imputation did best for the \cite{Garcia-Laencina2015} paper. We should start with that approach perhaps. Their target variable is binary, we can have different models here. 
+\item Given the dataset we have, perform PCA to see whether you can remove some attributes.  
+\item Three missing data mechanisms a la Rubin \cite{Little2012}. I think in our case should be MAR (missing at random) as well. Find out what the percentage is for missing data for each attribute and if this is below a critical threshold in comparison with the sample size. Q: What is the right threshold? See \textit{fraction of missing information} $\lambda$ described by Rubin
+\end{itemize}
 %%%% 
 %%% Feature Engineering
 \subsection{Feature engineering}
