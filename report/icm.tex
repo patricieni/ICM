@@ -77,7 +77,7 @@ There are two main datasets, one with biological information and one with clinic
 We give a brief description of the merged dataset before preprocessing:
 %
 \begin{itemize}
-\item \textbf{Key 1:} Patient ID - this is not unique across rows
+\item \textbf{Key 1:} Patient ID - this is not unique across rows 
 \item \textbf{Key 2:} Surgery date and clinical surgery date. 
 These are sometimes off by one day so we took only surgery dates as being relevant.
 \end{itemize}
@@ -86,11 +86,12 @@ There are a total of \textbf{7825} entries and \textbf{6688} unique patients. Ea
 \\
 Some of the attributes have missing values.
 \begin{enumerate}
-\item Diagnostic dates are there only for one fifth of the patients,  \textbf{1162}.
-\item Date of birth (DoB) is missing for \textbf{1002} patients.
-\item Date of death is missing for \textbf{4908} entries, should we assume these are survivors? 
-\item Gene data is very sparse, i.e. \textbf{Ch} markers.
-\item Gender data has \textbf{332} entries missing.
+\item Diagnostic dates are there only for one fifth of the patients,  \textbf{1162} - meaningless, not reliable
+\item Date of birth (DoB) is missing for \textbf{1002} patients. Figure out first whether there is a relation between DOB and other missing variables. Take them out one by one starting with  the IDH, see below. 
+\item Date of death is missing for \textbf{4908} entries, should we assume these are survivors? - no the data might be just missing because the patient didn't follow up. 
+\item Gene data is very sparse, i.e. \textbf{Ch} markers. No rule yet, we need to figure out how to deal with sparsity - not much to do, will imputation work? Should we even consider it? 
+\item Gender data has \textbf{332} entries missing. DELETE. 
+\item IDH1 and IDH2 is very important, if the study wasn't done the record is kind of pointless, so delete all those guys that don't have it. 
 \end{enumerate}
 
 %\subitem IDHmut>IDHwt - 2 classes 
@@ -142,12 +143,13 @@ As previously discussed, in the first phase we are interested in a smaller subse
 For some of them, some things remain unclear. \\
 \begin{enumerate}
 \item We aim to add age at surgery as one variable, taking into account surgery date and date of birth. 
-\item We do not have any attribute for KPS (performance status score) as far as we know. 
+\item Merge KPS from Marc's email (performance status score)
 \item The outcome is encoded in the surgery type variable \ref{fig:sub1}. It is either a type of surgical removal or biopsy. For this variable, does missing data tell us that there was no surgery or that we do not know the outcome?
 Does \textbf{aucune} mean that no surgical act whatsoever was undertaken?
-\item For radiotherapy and chemotherapy, should we assume that if the patient does not have a date, he did not undergo that treatment, or is this data missing instead? 
+\item For radiotherapy and chemotherapy, should we assume that if the patient does not have a date, he did not undergo that treatment, or is this data missing instead? If missing CHX and RDX and gene data is sparse then the record is poor
 \item For IDH mutations \ref{fig:sub2}, IDH1 and IDH2 seem to predominate there. Are these the two main ones we are interested in? You mentioned IDH wild type/mutated, so we concluded the \textbf{NORMAL} value of IDH1/IDH2 Gene stands for wild-type. Is this correct? In this context, what does the value \textbf{NC} stand for?
-\item In terms of genetic tests, is there any equivalence between the following coding schemes for various genes, i.e. can we treat \textbf{NORMAL} or \textbf{ALTERE} as carrying the same meaning across these schemes/genes? i.e. \ref{fig:sub2}, \ref{fig:sub3} and \ref{fig:sub4}.
+It's a valid result and the result means non-conclusive - we don't know. 
+\item In terms of genetic tests, is there any equivalence between the following coding schemes for various genes, i.e. can we treat \textbf{NORMAL} or \textbf{ALTERE} as carrying the same meaning across these schemes/genes? i.e. \ref{fig:sub2}, \ref{fig:sub3} and \ref{fig:sub4}. No, just use it the same as in the table for different genes. 
 \end{enumerate}
 %%% IMAGE 1  
 \begin{figure}[H]
@@ -180,7 +182,7 @@ Does \textbf{aucune} mean that no surgical act whatsoever was undertaken?
 \label{fig:genes}
 \end{figure}
 %
-\textbf{Multiple entries:} On average, patients have more than 1 entry (see fig. \ref{fig:m_entries}) according to how many surgeries they went through. Is that correct and do you have any pointers as to how to treat patients with multiple surgeries? Should we aggregate them or treat them independently? Or perhaps find some other clever way of dealing with that. 
+\textbf{Multiple entries:} On average, patients have more than 1 entry (see fig. \ref{fig:m_entries}) according to how many surgeries they went through. Is that correct and do you have any pointers as to how to treat patients with multiple surgeries? Should we aggregate them or treat them independently? Or perhaps find some other clever way of dealing with that. \textbf{Use the first date surgery date after you order it by dates.  DO THIS FIRST}
 \begin{figure}[H]
 \centering
 \includegraphics[width=1.0\linewidth]{images/multiple_entries.png}
@@ -193,10 +195,11 @@ We want to confirm our idea of selecting the target variable for our models.
 First of all, can we assume that all patients where there is no death date specified, are still alive? (as opposed to them not being alive anymore, but this record missing)
 Qualitatively we thought of incorporating the surgery date, cancer detection date and death date, but we would much prefer if you would confirm. 
 \begin{itemize}
+\item The time between surgery date and death date. We would scale this variable accordingly to account for no death. (\textbf{USE THIS ONE})
 \item The easiest target to model is a binary variable representing alive/dead.
-\item The time between diagnostic date and death date. We would scale this variable accordingly to account for no death. 
 \item The time between the first/last surgery and death time. We could incorporate in this the number of surgeries a person had. 
 \end{itemize}
+%
 % \textbf{Feature standardization and class imbalances}
 %
 %Normal, Amplified
