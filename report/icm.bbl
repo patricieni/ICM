@@ -1,0 +1,42 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{GLAAA15}
+
+\bibitem[BFHH14]{Bell2014}
+Melanie~L Bell, Mallorie Fiero, Nicholas~J Horton, and Chiu-Hsieh Hsu.
+\newblock {Handling missing data in RCTs; a review of the top medical
+  journals.}
+\newblock {\em BMC medical research methodology}, 14:118, nov 2014.
+
+\bibitem[GLAAA15]{Garcia-Laencina2015}
+Pedro~J. Garc{\'{i}}a-Laencina, Pedro~Henriques Abreu, Miguel~Henriques Abreu,
+  and No{\'{e}}mia Afonoso.
+\newblock {Missing data imputation on the 5-year survival prediction of breast
+  cancer patients with unknown discrete values}.
+\newblock {\em Computers in Biology and Medicine}, 59:125--133, apr 2015.
+
+\bibitem[GOG07]{Graham2007}
+John~W. Graham, Allison~E. Olchowski, and Tamika~D. Gilreath.
+\newblock {How Many Imputations are Really Needed? Some Practical
+  Clarifications of Multiple Imputation Theory}.
+\newblock {\em Prevention Science}, 8(3):206--213, aug 2007.
+
+\bibitem[Gra09]{Graham2009}
+John~W. Graham.
+\newblock {Missing Data Analysis: Making It Work in the Real World}.
+\newblock {\em Annual Review of Psychology}, 60(1):549--576, 2009.
+
+\bibitem[LDC{\etalchar{+}}12]{Little2012}
+Roderick~J. Little, Ralph D'Agostino, Michael~L. Cohen, Kay Dickersin, Scott~S.
+  Emerson, John~T. Farrar, Constantine Frangakis, Joseph~W. Hogan, Geert
+  Molenberghs, Susan~A. Murphy, James~D. Neaton, Andrea Rotnitzky, Daniel
+  Scharfstein, Weichung~J. Shih, Jay~P. Siegel, and Hal Stern.
+\newblock {The Prevention and Treatment of Missing Data in Clinical Trials}.
+\newblock {\em New England Journal of Medicine}, 367(14):1355--1360, oct 2012.
+
+\bibitem[Rub96]{Rubin1996}
+Donald~B. Rubin.
+\newblock {Multiple Imputation After 18+ Years}.
+\newblock {\em Journal of the American Statistical Association}, 91(434):473,
+  jun 1996.
+
+\end{thebibliography}
