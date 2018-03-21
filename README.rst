@@ -1,5 +1,8 @@
-# ICM Project
-Collaboration for detecting glioblastomas from clinical and biological data. More to come later on. 
+***
+ICM Project
+*** 
+Collaboration for detecting glioblastomas from clinical and biological data.
+
 ```gbm``` folder contains some helper methods, should add all tools in there
 
 **Example to run:**
