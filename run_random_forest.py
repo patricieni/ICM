@@ -85,7 +85,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X,Y,train_size=0.8, test_siz
 
     
 # Random forests n_estimators based on validation set
-estimators_range = [5, 10, 20, 50, 100, 200, 300, 400, 500,1000]
+estimators_range = [5, 10, 20, 50, 100, 200, 300, 400, 500, 1000, 2000]
 accuracies = []
 errors = []
 roc_auc = []
@@ -148,7 +148,7 @@ plt.savefig(results_path + output[0])
 print("Saved Results for RF")
 
 plt.figure()
-gbm.evaluation.plot_confusion_matrix(cm[5], norm=True, classes=labels)
+gbm.evaluation.plot_confusion_matrix(cm[8], norm=True, classes=labels)
 plt.xlabel('Interpreted cluster label')
 plt.savefig(results_path + output[1])
 print("Saved Confusion Matrix for RF")
