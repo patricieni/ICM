@@ -16,25 +16,16 @@ def plot_report(y_test, y_pred, labels):
 
 
 def plot_hist(history, save_as=None):
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    if save_as:
-        plt.savefig(save_as + '_acc.jpg')
-    plt.show()
-    # summarize history for loss
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    if save_as:
-        plt.savefig(save_as + '_loss.jpg')
-    plt.show()
+    for metric in [k for k in history.history.keys() if 'val' not in k]:
+        plt.plot(history.history[metric])
+        plt.plot(history.history['val_' + metric])
+        plt.title('Model ' + metric)
+        plt.ylabel(metric)
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        if save_as:
+            plt.savefig(save_as + '_acc.jpg')
+        plt.show()
 
 
 def plot_confusion_matrix(cm, classes=None, title='Confusion matrix',
