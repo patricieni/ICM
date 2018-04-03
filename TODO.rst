@@ -1,5 +1,5 @@
 ***********
-To Do List
+To Do Listt
 ***********
 
 1. Run MICE imputed dataset with only GBM patients - as mentioned, things change when focusing only on GBM patients actually - How do we actually do this?
@@ -14,8 +14,8 @@ To Do List
 
 
 **Splitting the predictor variables**
-Example: 
-Always one less for the cut points/values 
+Example:
+Always one less for the cut points/values
 
 Example:
 
@@ -28,14 +28,14 @@ We need one model that runs on unimputed data, this will be the GP from 2)
 
 I will do:
 
-1. What confuses the matrix? the exact values we have confused and their profiles - this fits in with wrapping up with the RF workflow. 
-    - Can I split the classes in an automatic way? I will look up something like how to discretize continuous variables automatically, i.e. what’s the best approach. 
+1. What confuses the matrix? the exact values we have confused and their profiles - this fits in with wrapping up with the RF workflow.
+    - Can I split the classes in an automatic way? I will look up something like how to discretize continuous variables automatically, i.e. what’s the best approach.
 
 2. Regression on the life expectancy - we can both focus on this if you want, or I can do it myself
 	- NN approach via Paul’s witchcraft
-	- Gaussian Processes and model the likelihood as a poisson distribution - the life expectancy is actually very similar to Poisson, see below. 
+	- Gaussian Processes and model the likelihood as a poisson distribution - the life expectancy is actually very similar to Poisson, see below.
 
-Build a molecular profile from our predictions by inspecting different patients 
+Build a molecular profile from our predictions by inspecting different patients
 Combine variables like in the deep&wide model of NN i.e. tumor grade with performance status (I guess this is IK?)
 
-3. Compare with the Recursive partioning. 
+3. Compare with the Recursive partioning.
