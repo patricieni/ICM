@@ -2,6 +2,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from scipy.signal import savgol_filter
 from sklearn.metrics import classification_report, confusion_matrix, \
     accuracy_score, roc_curve, auc
 
@@ -49,7 +50,48 @@ def plot_confusion_matrix(cm, classes=None, title='Confusion matrix',
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
+    
+def plot_confidence_interval(predictions, ground_truth, prediction_id=123, interval_in_days=181):
+    r"""
+    Plot the probability interval given an array of probabilities.
 
+    Parameters
+    ----------
+    predictions: pandas.DataFrame / numpy.array [N, M]
+        N - number of predictions
+        M - probability per interval
+    
+    ground_truth: pandas.DataFrame / numpy.array [N]
+        N - number of entries
+     
+    prediction_id: int
+        id of the prediction < N
+    
+    interval_in_days: int
+        number of days over which we smooth the probabilities
+    """
+        
+    Y_pred = np.array(predictions, copy=True)  
+    window_size = interval_in_days
+    
+    # Smooth interval
+    # Savgol changes inplace, so we need the copy above
+    smooth_res = savgol_filter(predictions[prediction_id], window_size, 2)
+
+    x = smooth_res * window_size
+    y = range(len(predictions[prediction_id]))
+
+    res = ground_truth[prediction_id]
+    
+    # Plot probability
+    plt.fill_between(y, x, 0, color='b', alpha=0.3)
+    plt.plot(res, x.max(), color='r', linewidth=10)
+
+    # Plot results
+    plt.plot([res, res], [x.max() , 0], color='r')
+    plt.scatter([res], [x.max()], color='r')
+    
+    
 # Compute ROC curve and ROC area for each class manually as there seems to be
 # no good library to do it for a multiclass problem..
 # for tpr  and fpr sum over rows
