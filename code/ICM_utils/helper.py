@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import train_test_split
 
-data_path = str(Path(os.getcwd())) + "/data/"
+data_path = str(Path(os.getcwd()).parent) + "/data/"
 
 
 def write_to_pickle(dataframe, name):
