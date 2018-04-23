@@ -20,19 +20,15 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, l
 from sklearn.ensemble import AdaBoostClassifier, ExtraTreesClassifier, BaggingClassifier
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.model_selection import GridSearchCV
 
-import gbm
 
-pd.set_option('display.max_columns', None)
+import sys
+sys.path.append("../code")
+from ICM_utils import helper, evaluation, metrics
 
-def write_to_pickle(dataframe, name):
-    dataframe.to_pickle(data_path + name + ".pickle")
-def read_from_pickle(name): 
-    return pd.read_pickle(data_path + name + ".pickle")
-
-data_path = str(Path(os.getcwd())) + "/data/"
-results_path = str(Path(os.getcwd())) + "/results/random_forests/"
-#.parents[0]
+data_path = str(Path(os.getcwd()).parent) + "/data/"
+results_path = str(Path(os.getcwd()).parent) + "/results/random_forests/"
 
 # Args Parser
 parser = argparse.ArgumentParser(description='Random forests script')
@@ -57,7 +53,7 @@ df.drop("Unnamed: 0", axis = 1, inplace=True)
 
 
 # Try with three classes first
-df.loc[:,"life_expectancy_bin"] = gbm.helper.binning(df.life_expectancy, cut_points, labels)
+df.loc[:,"life_expectancy_bin"] = helper.binning(df.life_expectancy, cut_points, labels)
 #print(pd.value_counts(df_amelia.life_expectancy_bin, sort=False))
 print(df.life_expectancy_bin.values)
 print("\n")
@@ -81,77 +77,73 @@ df.Gender.replace(to_replace={'M':1, 'F':0},inplace=True)
 X = df.drop(["life_expectancy","life_expectancy_bin"], axis=1)
 Y = df.life_expectancy_bin
 
-X_train, X_test, Y_train, Y_test = train_test_split(X,Y,train_size=0.8, test_size=0.2, random_state=1332)
+# Will eventually have multiple runs with stdev
+random_states = [1332, 1, 5 ,8, 100, 78]
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size=0.25, random_state=random_states[0])
 
-    
-# Random forests n_estimators based on validation set
-estimators_range = [5, 10, 20, 50, 100, 200, 300, 400, 500, 1000, 2000]
-accuracies = []
-errors = []
-roc_auc = []
-cm = []
+# Grid search over a smaller space for estimators    
+# Create a model with 400 estimators for the grid search
+rfc = RandomForestClassifier(random_state = 1233)
+
+
+# Create the parameter grid based on the results of random search 
+param_grid = {
+    'bootstrap': [True, False],
+    'max_depth': [80, 90, 100, 110],
+    'max_features': [2, 3],
+    'min_samples_leaf': [3, 4, 5],
+    'min_samples_split': [8, 10, 12],
+    "criterion": ["gini", "entropy"],
+    "n_estimators": [300,500,1000,1500,2000]
+}
+#"max_features": ['auto','log2']
+
+
+# Instantiate GRID SEARCH over the space of parameters defined 
+# Should we play with CV? 
+grid_search = GridSearchCV(estimator = rfc, param_grid=param_grid, 
+                           n_jobs = -1, verbose = 2, # Do we need jobs and verbose to change?
+                           scoring='neg_log_loss', cv = 3, return_train_score=True)
+
+# Fit the model - should not show processing 
+grid_search.fit(X_train, Y_train);
+
+# Random forests n_estimators based on Grid Search
+best_grid = grid_search.best_estimator_
+#grid_accuracy = evaluate(best_grid, test_features, test_labels) - what is this one? what are the test_features? 
+
 l = np.array(labels)
-i=0
+# Does the below work?
+rfc=best_grid
 
-for n_estimators in estimators_range:
-    rfc = RandomForestClassifier(criterion='entropy', 
-                                   n_estimators=n_estimators,
-                                   max_features = 30,
-                                   max_depth =100,  
-                                   n_jobs = -1,
-                                   random_state = 1123)
-    rfc.fit(X_train, Y_train)
-    
-    # Accuracy
-    accuracies.append(rfc.score(X_test,Y_test)) 
-    
-    # XEntropy Error
-    probas = rfc.predict_proba(X_test)
-    y_pred = np.argmax(probas, axis=1)
-    error = log_loss(Y_test,probas)
-    errors.append(error)
-    
-    # Confusion matrix      
-    cfm = confusion_matrix(Y_test, l[y_pred])
-    cm.append(cfm)
-    
-    # ROC-AUC - I think this is wrong
-    Y_test_binary = label_binarize(Y_test, classes=labels)
-    y_pred_binary = label_binarize(l[y_pred],classes =labels)
-    auc_curve = gbm.evaluation.multi_class_auc(len(l),Y_test_binary,y_pred_binary)
-    roc_auc.append(auc_curve)
-    i+=1
-    print("Logloss {} --Random Forest Classifier with features = {}, max_depth = {}, estimators = {} -- {}/{}".format(error,rfc.max_features,rfc.max_depth,n_estimators,i,len(estimators_range)))
+rfc.fit(X_train, Y_train)
 
-n_estimators_optimal_accuracies = estimators_range[np.argmax(accuracies)]
-n_estimators_optimal_errors = estimators_range[np.argmin(errors)]    
+# Accuracy on test
+accuracy = rfc.score(X_test,Y_test)
+    
+# XEntropy Error
+probas = rfc.predict_proba(X_test)
+y_pred = np.argmax(probas, axis=1)
+error = log_loss(Y_test,probas)
+
+# Confusion matrix      
+cfm = confusion_matrix(Y_test, l[y_pred])
+
 print("\n")
 if not os.path.isdir(results_path):
     os.mkdir(results_path)
 
-
-fig, ax = plt.subplots(1, 3, figsize=(15,10))
-
-ax[0].scatter(estimators_range, errors)
-ax[0].set_ylabel('Log-loss error on validation set')
-ax[0].set_xlabel('Number of estimators for Random Forest Classifier');
-
-ax[1].scatter(estimators_range, accuracies)
-ax[1].set_ylabel('Accuracies on validation set')
-ax[1].set_xlabel('Number of estimators for Random Forest Classifier');
-
-ax[2].scatter(estimators_range, roc_auc)
-ax[2].set_ylabel('AUC on validation set')
-ax[2].set_xlabel('Number of estimators for Random Forest Classifier');
-
-plt.savefig(results_path + output[0])
+# Should put the below in some sort of plot 
 print("Saved Results for RF")
+print("For {0} class problem --- Score: {1} and Logloss: {2}".format(len(labels), accuracy, error))
 
 plt.figure()
-gbm.evaluation.plot_confusion_matrix(cm[8], norm=True, classes=labels)
+evaluation.plot_confusion_matrix(cfm, norm=True, classes=labels)
 plt.xlabel('Interpreted cluster label')
-plt.savefig(results_path + output[1])
+
+plt.savefig(results_path + output[0])
 print("Saved Confusion Matrix for RF")
+
 '''
 # Gradient Boosting classifiers based on validation/test
 estimators_range = [100, 200, 300, 400, 500, 1000, 2000]
