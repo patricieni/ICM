@@ -39,13 +39,15 @@ def process_amelia(amelia_csv_fn):
     # Load the dataset
     df_amelia = pd.read_csv(amelia_csv_fn)
     df_amelia.drop("Unnamed: 0", axis=1, inplace=True)
-    labels = ["1.5year", "4years", "more"]
-    cut_points = [500, 1500]
+    # labels = ["1.5year", "4years", "more"]
+    # cut_points = [500, 1500]
 
-    # labels = ["3_months","6_months","9_months","12_months","15_months",
-    # "18_months","2_years","3_years","4_years","5_years","10_years",
-    # "10_plus_years"] cut_points = [90,180,270,360,450,540,720,1095,1460,
-    # 1825,3650]
+    labels = ["3_months", "6_months", "9_months", "12_months", "15_months",
+              "18_months", "2_years", "3_years", "4_years", "5_years",
+              "10_years",
+              "10_plus_years"]
+    cut_points = [90, 180, 270, 360, 450, 540, 720, 1095, 1460, 1825, 3650]
+
     df_amelia.loc[:, "life_expectancy_bin"] = binning(
         df_amelia.life_expectancy, cut_points, labels)
 
