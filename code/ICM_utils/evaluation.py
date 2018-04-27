@@ -117,6 +117,27 @@ def multi_class_auc(size, y_test, y_score):
     weighted_roc_auc = np.sum(roc_auc) / r
     return weighted_roc_auc
 
+def confused_entries(X,y_true,y_pred,val1,val2):
+    """Creates a dataframe based on what entries were predicted as val2 and should have been predicted as val1
+    Perhaps it makes sense to return the diagonal entries as well
+    
+    Args:
+        X (df): Dataset with features
+        y_true (dic): True target variables for dataset X - as a dictionary!
+        y_pred (array): Predicted target variables by the model
+        val1 (string): The actual label value that should have been predicted (true label)
+        val2 (string): The predicted label that was wrong/right (false label)
+    Returns:
+        pandas.dataframe: a dataframe with all val1 entries from X that were confused with val2
+    """
+
+    confused = []
+    for key1,key2 in zip(y_true.keys(),y_pred):
+    
+        if y_true.get(key1)== val1 and key2 == val2:
+            confused.append(key1)
+    return X.loc[confused,:]
+
 
 '''
 # Plot of a ROC curve for a specific class
