@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import pandas as pd
+import numpy  as np
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import train_test_split
@@ -98,3 +99,57 @@ def get_train_test_data(data_df, regression=False, train_size=0.8):
     X_test.drop('life_expectancy_bin', axis=1, inplace=True)
 
     return X_train, Y_train, X_test, Y_test
+
+
+from collections import defaultdict
+
+def from_dummies(df_dummies):
+    """Super specialized method for reverting from dummies dataframe to original dataframe for our tumor dataset
+    from_dummies(pd.get_dummies(X)) == X
+    
+    Args:
+        df_dummies (pd.dataframe): The dummies dataframe
+    
+    Returns:
+        pd.dataframe: The original dataframe before dummies was applied
+    """
+
+    # This works mostly for our dataset 
+    pos = defaultdict(list)
+    vals = defaultdict(list)
+
+    for i, c in enumerate(df_dummies.columns):
+        if "_" in c:
+            # Split at second one only, if it doesn't have three don't join
+            values = c.split("_", -1)
+            if len(values) >2:
+                k = "_".join(values[:2])
+                v = values[-1]
+                pos[k].append(i)
+                vals[k].append(v)
+            elif values[1] in ["mutant", "wt","NC"]:
+                k= values[0]
+                v= values[1]
+                pos[k].append(i)
+                vals[k].append(v)
+            else: 
+                # The continuous variables that have _ in the name
+                k = "_".join(values)
+                pos["_"].append(i)
+        else: 
+            # Continuous variables with no _ in the name
+            k = c
+            pos["_"].append(i)
+            
+    df = pd.DataFrame({k: pd.Categorical.from_codes(
+                              np.argmax(df_dummies.iloc[:, pos[k]].values, axis=1),
+                              vals[k])
+                      for k in vals})
+    # Copy the Continuous non-dummies and keep them the same
+    indexes = df_dummies.columns[pos["_"]]
+    all_vals = df_dummies.iloc[:, pos["_"]]
+    all_vals = all_vals.reset_index(drop=True)
+    #df.reset_index(drop=True)
+    df[indexes] = all_vals
+
+    return df
