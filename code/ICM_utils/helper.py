@@ -34,6 +34,73 @@ def binning(col, cut_points, labels=None):
     return colBin
 
 
+def label_encoder(df1,labels,cut_points):
+    """Process the dataframe into integer categories using 
+    LabelEncoder plus some previously defined logic
+    
+    Args:
+        df1 (pandas.df): Dataframe to transform
+        labels (list): Labels
+        cut_points (list): Binning points
+    
+    Returns:
+        pandas.df, dict: Transformed dataframe and its associated dictionary
+    """
+    df = df1.copy(deep=True)
+    if "Unnamed: 0" in df.columns:
+        df.drop("Unnamed: 0", axis=1, inplace=True)
+
+    df.loc[:, "life_expectancy_bin"] = binning(df.life_expectancy, cut_points, labels)
+
+    df['life_expectancy_bin'] = LabelEncoder().fit_transform(df['life_expectancy_bin'])
+
+    # Initialise an empty dictionary to keep all LabelEncoders
+    le_dict = dict() 
+    # LabelEncoders
+    df_categories = df.copy(deep=True)
+    # Loop over attributes by excluding the continuous oness
+    for column in df_categories.drop(
+            ['Age_surgery', 'life_expectancy', 'Tumor_grade', 'IDH_TERT',
+             'IK'], axis=1):
+        le = LabelEncoder().fit(
+            df_categories[column])  # Initialise the LabelEncoder and fit
+        df_categories[column] = le.transform(df_categories[
+                                                 column])
+        # Transform data and save in credit_clean DataFrame
+        le_dict[column] = le  # Store the LabelEncdoer in dictionary
+
+    return df_categories, le_dict    
+
+def process_dataset(df_amelia,labels,cut_points):
+    """Process any dataset given a name and some binning cutting points
+    The binning is used for classification purposes.
+    Args:
+        df_amelia (pandas.df): Dataframe to process
+        labels (list): Labels
+        cut_points (list): bin points
+    
+    Returns:
+        dataframe,labels: The processed dataframe and labels
+    """
+    df = df_amelia.copy(deep=True)
+    df.drop("Unnamed: 0", axis=1, inplace=True)
+
+    df.loc[:, "life_expectancy_bin"] = binning(df.life_expectancy, cut_points, labels)
+
+    
+    non_dummy_cols = ['Tumor_grade', 'IDH_TERT', 'life_expectancy',
+                      'life_expectancy_bin', 'Gender', 'IK', 'Age_surgery','TERT']
+    dummy_cols = list(set(df.columns) - set(non_dummy_cols))
+
+    df = pd.get_dummies(df, columns=dummy_cols)
+
+    df.Gender.replace(to_replace={'M': 1, 'F': 0}, inplace=True)
+    df.TERT.replace(to_replace={'wt':0,'mutant':1},inplace=True)
+
+    return df, labels    
+
+
+# This needs to go away eventually
 def process_amelia(amelia_csv_fn):
     # Load the dataset
     df_amelia = pd.read_csv(amelia_csv_fn)
@@ -45,12 +112,9 @@ def process_amelia(amelia_csv_fn):
     # "18_months","2_years","3_years","4_years","5_years","10_years",
     # "10_plus_years"] cut_points = [90,180,270,360,450,540,720,1095,1460,
     # 1825,3650]
-    df_amelia.loc[:, "life_expectancy_bin"] = binning(
-        df_amelia.life_expectancy, cut_points, labels)
+    df_amelia.loc[:, "life_expectancy_bin"] = binning(df_amelia.life_expectancy, cut_points, labels)
 
-    df_amelia['life_expectancy_bin'] = LabelEncoder().fit_transform(
-        df_amelia['life_expectancy_bin'])
-    # df_amelia.drop("life_expectancy", axis=1, inplace =True)
+    df_amelia['life_expectancy_bin'] = LabelEncoder().fit_transform(df_amelia['life_expectancy_bin'])
 
     le_dict = dict()  # Initialise an empty dictionary to keep all
     # LabelEncoders
@@ -68,36 +132,53 @@ def process_amelia(amelia_csv_fn):
 
     df = df_amelia.copy(deep=True)
     non_dummy_cols = ['Tumor_grade', 'IDH_TERT', 'life_expectancy',
-                      'life_expectancy_bin', 'Gender', 'IK', 'Age_surgery']
+                      'life_expectancy_bin', 'Gender', 'IK', 'Age_surgery','TERT']
     dummy_cols = list(set(df.columns) - set(non_dummy_cols))
 
     df = pd.get_dummies(df, columns=dummy_cols)
 
     df.Gender.replace(to_replace={'M': 1, 'F': 0}, inplace=True)
+    df.TERT.replace(to_replace={'wt':0,'mutant':1},inplace=True)
 
     return df, labels
 
+def display_values(df_amelia):
+   for column in df_amelia:
+        unique_vals = np.unique(df_amelia[column])
+        nr_vals = len(unique_vals)
+        if nr_vals < 20:
+            print('Number of values for attribute {}: {} -- {}'.format(column, nr_vals, unique_vals))
+        else:
+            print('Number of values for attribute {}: {}'.format(column, nr_vals))
+            
 
-def get_train_test_data(data_df, regression=False, train_size=0.8):
-    df_tensorflow = data_df.copy(deep=True)
-    X_train, X_test = train_test_split(df_tensorflow,
-                                       train_size=train_size,
-                                       test_size=1 - train_size)
+def get_train_test_data(data_df, regression=False, train_size=0.8,random_state=1232):
+    """TODO: Paul to approve, it was too complicated before
+    
+    Args:
+        data_df ([type]): [description]
+        regression (bool, optional): Defaults to False. [description]
+        train_size (float, optional): Defaults to 0.8. [description]
+        random_state (int, optional): Defaults to 1232. [description]
+    
+    Returns:
+        [type]: [description]
+    """
 
+    df = data_df.copy(deep=True)
+    
     if regression:
-        Y_train = X_train['life_expectancy']
-        Y_test = X_test['life_expectancy']
+        Y = df.life_expectancy
     else:
-        Y_train = X_train['life_expectancy_bin']
-        Y_test = X_test['life_expectancy_bin']
+        Y = df.life_expectancy_bin
+    
+    # Remove columns
+    X = df.drop(["life_expectancy","life_expectancy_bin"], axis=1)
 
-    # remove columns
-    X_train.drop('life_expectancy', axis=1, inplace=True)
-    X_test.drop('life_expectancy', axis=1, inplace=True)
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y,
+                                       train_size=train_size,random_state=random_state)
 
-    X_train.drop('life_expectancy_bin', axis=1, inplace=True)
-    X_test.drop('life_expectancy_bin', axis=1, inplace=True)
-
+    
     return X_train, Y_train, X_test, Y_test
 
 
@@ -153,3 +234,12 @@ def from_dummies(df_dummies):
     df[indexes] = all_vals
 
     return df
+
+def dropnull(df):
+    """Drop any row that could contain NA values
+    """
+
+    for col in df.columns:
+        print('{0}\n  {1}\n'.format(col,df[col].isnull().value_counts()))
+    df_1 = df.dropna(axis=0, how='any')    
+ 
