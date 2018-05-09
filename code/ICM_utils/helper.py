@@ -46,6 +46,9 @@ def process_amelia(amelia_csv_fn):
               "10_plus_years"]
     cut_points = [90, 180, 270, 360, 450, 540, 720, 1095, 1460, 1825, 3650]
 
+    labels = ["6months", "1.2year", "2years", "3years", "more"]
+    cut_points = [200, 400, 700, 1100]
+
     df_amelia.loc[:, "life_expectancy_bin"] = binning(
         df_amelia.life_expectancy, cut_points, labels)
 
