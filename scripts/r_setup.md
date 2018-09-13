@@ -7,9 +7,15 @@ This includes essential packages in R  dplyr, shiny, ggplot2, tidyr, caret, and 
 
 Build a conda R package of your choosing 
 
-i.e. 
-conda skeleton cran mice conda build r-mice/
+i.e.
+MICE: 
+conda install -c mittner r-mice 
 
 
 
+Install rpy2
+conda install -c r rpy2 
+
+Use magic commands in notebook to switch between them
+%load_ext rpy2.ipython
 
