@@ -10,8 +10,8 @@ Build a conda R package of your choosing
 i.e.
 MICE: 
 conda install -c mittner r-mice 
-
-
+kNN
+conda install -c conda-forge r-rknn 
 
 Install rpy2
 conda install -c r rpy2 
