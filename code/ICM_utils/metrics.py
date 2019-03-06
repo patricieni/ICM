@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from sklearn.preprocessing import LabelEncoder
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
