@@ -8,7 +8,6 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-import graphviz
 
 from sklearn import tree
 from sklearn.cluster import KMeans
@@ -19,7 +18,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, label_binarize
 from sklearn.ensemble import AdaBoostClassifier, ExtraTreesClassifier, BaggingClassifier
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 
 
@@ -43,7 +42,7 @@ parser.add_argument('-v', '--values', nargs="+", type=int,
 parser.add_argument('-lr', '--learning_rate', nargs="?",
                     type=float, help='Learning rate for rf', required=True)
 parser.add_argument('-o', '--output', nargs="+", type=str,
-                    help='Output files', required=True)
+                    help='Output files', required=False)
 
 args = parser.parse_args()
 dataset = args.dataset
