@@ -108,8 +108,8 @@ def process_amelia(amelia_csv_fn):
     # Load the dataset
     df_amelia = pd.read_csv(amelia_csv_fn)
     df_amelia.drop("Unnamed: 0", axis=1, inplace=True)
-    labels = ["1.5year", "4years", "more"]
-    cut_points = [500, 1500]
+    labels = ["1.2year", "2.5years", "more"]
+    cut_points = [400, 900]
 
     # labels = ["3_months","6_months","9_months","12_months","15_months",
     # "18_months","2_years","3_years","4_years","5_years","10_years",

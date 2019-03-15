@@ -129,9 +129,11 @@ def gower_distances(X, Y=None, feature_weight=None, categorical_features=None):
             (np.isfinite(X.sum()) or np.isfinite(X).all()):
         array_type = type(np.zeros(1, X.dtype).flat[0])
 
-    X, Y = check_pairwise_arrays(X, Y, precomputed=False, dtype=array_type)
+    X, Y = check_pairwise_arrays(
+        X.reshape(1, -1), Y.reshape(1, -1), precomputed=False, dtype=array_type)
 
-    X, Y = check_pairwise_arrays(X, Y, dtype=np.object)
+    X, Y = check_pairwise_arrays(
+        X.reshape(1, -1), Y.reshape(1, -1), dtype=np.object)
 
     n_rows, n_cols = X.shape
 
