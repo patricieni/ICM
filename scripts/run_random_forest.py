@@ -26,6 +26,16 @@ import sys
 sys.path.append("../code")
 from ICM_utils import helper, evaluation, metrics
 
+
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 data_path = str(Path(os.getcwd()).parent) + "/data/"
 results_path = str(Path(os.getcwd()).parent) + "/results/random_forests/"
 
@@ -41,6 +51,8 @@ parser.add_argument('-v', '--values', nargs="+", type=int,
                     help='Values where to split the dataset (in days, i.e. 500 ~ 1.5 years )', required=True)
 parser.add_argument('-lr', '--learning_rate', nargs="?",
                     type=float, help='Learning rate for rf', required=True)
+parser.add_argument('-g', '--gbm', nargs='?', type=str2bool,
+                    help='Should we take only gbm patients ?', required=False, default='no')
 parser.add_argument('-o', '--output', nargs="+", type=str,
                     help='Output files', required=False)
 
@@ -50,11 +62,15 @@ labels = args.labels
 cut_points = args.values
 learning_rate = args.learning_rate
 output = args.output
+gbm_only = args.gbm
 
 # Clean up from the imputation
 df = pd.read_csv(data_path+dataset)
 df.drop("Unnamed: 0", axis=1, inplace=True)
 
+if gbm_only:
+    print("Using only GBM patients for predictions")
+    df = df[df.Tumor_type == "GBM"]
 
 # Try with three classes first
 df.loc[:, "life_expectancy_bin"] = helper.binning(
@@ -107,7 +123,7 @@ for r_state in random_states:
         'min_samples_leaf': [3, 4, 5],
         'min_samples_split': [8, 10, 12],
         "criterion": ["gini", "entropy"],
-        "n_estimators": [300, 500, 1000, 1500, 2000]
+        "n_estimators": [20, 30, 400, 1000]
     }
 
     # Instantiate GRID SEARCH over the space of parameters defined
@@ -137,8 +153,8 @@ for r_state in random_states:
     y_pred = np.argmax(probas, axis=1)
     error = log_loss(Y_test, probas)
 
-    accuracies.append[accuracy]
-    log_losses.append[error]
+    accuracies.append(accuracy)
+    log_losses.append(error)
 
 print("\n")
 if not os.path.isdir(results_path):
