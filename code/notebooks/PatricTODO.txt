@@ -1,0 +1,24 @@
+1. Finish DT/RF workflow with regression and classification including XGBoost. 
+
+Won't do much than what already is ... 
+    * What can I do in terms of data viz/data exploration? 
+    * tSNE plots for our dataset
+    * Data exploration to begin with not just on predictions
+
+    Backlog -  AUC-ROC for multi class  problems 
+
+2. MOFA
+    * Figure out what the MOFA means by running yourself the whole thing or just looking at the results in the drive. 
+    * How many factors do we have active in what data modalities? 
+
+    Specifically: 
+
+    Cumulatively, the factors explained 41% of variation in the drug response data, 38% in the mRNA data, 24% in the DNA methylation data and and 24% in the     mutation data. 
+
+3. What to do with the life_expectancy variable? Does it make sense to bin it? 
+
+From Poisson when it's all data it goes to Gaussian when it's only up to 1000 days. 
+So the question is, do I have to to take some log-normal of the data for it to make sense?
+What is the idea in using this variable? and what is the right way? Read somewhere on how to deal with age, and should I even cluster it? ..Maybe I should do Paul's regression on it. 
+
+TODO - fix the script now...

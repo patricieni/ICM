@@ -3,7 +3,9 @@ ICM Project
 ------------
 Collaboration for detecting glioblastomas from clinical and biological data.
 
-```gbm``` folder contains some helper methods, should add all tools in there
+```code/utils``` folder contains some helper methods, should add all tools in there
+
+We don't want to keep data on github. Please put all your local data in the ```data``` folder.
 
 **Example to run:**
 ``python run_random_forest.py -d imputed_dataset_no_censoring_26022018_MICE.csv -l 1.2years 4years more -v 400 1200 -lr 0.03 -o scores.jpg cfm.jpg``
